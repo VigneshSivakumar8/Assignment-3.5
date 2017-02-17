@@ -1,0 +1,108 @@
+1. HIGH AVAILABILITY OF NAMENODE :-
+    
+    SPOF Problem :
+            Hadoop 1.0 NameNode has single point of failure (SPOF) problem- which means that if the NameNode fails, then that Hadoop Cluster
+       will become out-of-the-way. Nevertheless, this is anticipated to be a rare occurrence as applications make use of business critical
+       hardware with RAS features (Reliability, Availability and Serviceability) for all the NameNode servers. In case, if NameNode 
+       failure occurs then it requires manual intervention of the Hadoop Administrators to recover the NameNode with the help of a 
+       secondary NameNode.
+             NameNode SPOF problem limits the overall availability of the Hadoop Cluster in the following ways:
+               i) If there are any planned maintenance activities of hardware or software upgrades on the NameNode then it will result in 
+          overall downtime of the Hadoop Cluster.
+              ii) If any unplanned event triggers, which results in the machine crashing, then the Hadoop cluster would not be available
+          unless the Hadoop Administrator restarts the NameNode.
+          
+    High Availability in Hadoop 2.x :
+             Hadoop 2.0 overcomes this SPOF shortcoming by providing support for multiple NameNodes. It introduces Hadoop 2.0 High 
+       Availability feature that brings in an extra NameNode (Passive Standby NameNode) to the Hadoop Architecture which is 
+       configured for automatic failover.
+             The main motive of the Hadoop 2.0 High Availability project is to render availability to big data applications 24/7 by 
+       deploying 2  Hadoop NameNodes –One in active configuration and the other is the Standby Node in passive configuration.
+             Earlier there was one Hadoop NameNode for maintaining the tree hierarchy of the HDFS files and tracking the data storage in
+       the cluster. Hadoop 2.0 High Availability allows users to configure Hadoop clusters with uncalled- for NameNodes so as to eliminate
+       the probability of SPOF in a given Hadoop cluster. The Hadoop Configuration capability allows users to build clusters horizontally
+       with several NameNodes which can operate autonomously through a common data storage pool, thereby, offering better computing
+       scalability when compared to Hadoop 1.0.
+             With Hadoop 2.0, Hadoop architecture is now configured in a manner that it supports automated failover with complete stack
+       resiliency and a hot Standby NameNode.
+       
+             Hadoop 2.0 is keyed up to identify any failures in NameNode host and processes, so that it can automatically switch to the 
+       passive NameNode i.e. the Standby Node to ensure high availability of the HDFS services to the Big Data applications. With the
+       advent of Hadoop 2.0 HA it’s time for Hadoop Administrators to take a breather, as this process does not require manual intervention.
+             With HDP 2.0 High Availability, the complete Hadoop Stack i.e. HBase, Pig, Hive, MapReduce, Oozie are equipped to tackle the 
+       NameNode failure problem- without having to lose the job progress or any related data. Thus, any critical long running jobs 
+       that are scheduled to be completed at a specific time will not be affected by the NameNode failure.
+       
+2. CHECK POINTING :-
+             
+             Hadoop Distributed File System (HDFS) is a journaled file system, where new changes to files in HDFS are captured in an 
+        edit log that’s stored on the NameNode in a file named. Periodically, when the file reaches a certain threshold or after a 
+        certain period has elapsed, the journaled entries need to be committed to the master file.
+             The NameNode itself doesn’t do this, because it’s designed to answer application requests as quickly as possible. More
+        importantly, considerable risk is involved in having this metadata update operation managed by a single master server.
+        
+             Checkpointing services for a Hadoop cluster are handled by one of four possible daemons, which need to run on their own 
+        dedicated master node alongside the NameNode daemon’s master node:
+
+               i) Secondary NameNode: Prior to Hadoop 2, this was the only checkpointing daemon, performing the checkpointing process
+             described in this section. The Secondary NameNode has a notoriously inaccurate name because it is in no way “secondary” or a “standby” for the NameNode.
+              ii) Checkpoint Node: The Checkpoint Node is the replacement for the Secondary NameNode. It performs checkpointing and 
+             nothing more.
+             iii) Backup Node: Provides checkpointing service, but also maintains a backup of the and edits file.
+              iv) Standby NameNode: Performs checkpointing service and, unlike the old Secondary NameNode, the Standby NameNode is a 
+             true standby server, enabling a hot-swap of the NameNode process to avoid any downtime.
+             
+             The following steps describe the checkpointing process as it’s carried out by the NameNode and the checkpointing service
+        (note that four possible daemons can be used for checkpointing):
+
+                * When it’s time to perform the checkpoint, the NameNode creates a new file to accept the journaled file system changes.
+                * As a result, the file accepts no further changes and is copied to the checkpointing service, along with the file.
+                * The checkpointing service merges these two files, creating a file named.
+                * The checkpointing service copies the file to the NameNode.
+                * The NameNode overwrites the file with.
+                * The NameNode renames the file to.
+                
+3. HDFS FEDERATION :-
+             
+             Hadoop federation allows scaling the name service horizontally. It uses several namenodes or namespaces which are
+         independent of each other. These independent namenodes are federated i.e. they don’t require inter coordination. These datanodes
+         are used as common storage by all the namenodes. Each datanode is registered with all the namenodes in the cluster. These 
+         datanodes send periodic reports and responds to the commands from the name nodes. We have a block pool which is a set of blocks
+         that belong to a single namespace. In a cluster, the datanodes stores blocks for all the block pools. Each block pool is managed
+         independently. This enables the name space to generate block ids for new blocks without informing other namespaces. If one
+         namenode fails for any reason, the datanode keeps on serving from other namenodes.
+             One namespace and its block are collectively called Namespace Volume. When a namespace or a namenode is deleted the
+         corresponding block pool at the datanode is deleted automatically. In the process of cluster up-gradation, each namespace
+         volume is upgraded as a unit.
+         
+         Benefits of Hadoop Federation:
+                            Hadoop federation comes up with some advantages and benefits which are listed as under –
+
+               Scalability and Isolation – Multiple namenodes horizontally scales up in the file system namespace. This actually 
+          separates namespace volumes for users and categories of application and provides an absolute isolation.
+               Generic Storage Service – The block level pool abstraction allows the architecture to build new file systems on top of
+          block storage. We can easily build new applications on the block storage layer without using the file system interface.
+          Customized categories of block pool can also be built which are different from the default block pool.
+               Simple Design – Namenodes and namespaces are independent of each other. There is hardly any scenario which requires 
+          changing the existing name nodes. Each name node is built to be robust. Federation is also backward compatible. It easily
+          integrates with the existing single node deployments which work without any configuration changes.
+
+         Configuring an HDFS Federation:
+                   Configuration of Hadoop Federation is designed in such a way that all the nodes in the cluster have the same
+           configuration. The configuration is carried out in the following steps –
+
+                Step 1 – The following parameters needs to be added in the existing configuration –
+                            * nameservices – This is configured with a list of comma separated NameServiceIDs. This parameter is
+                            used by Datanodes to determine all the namenodes in the cluster.
+                Step 2 – The following configurations needs to be suffixed with the corresponding name service ID into the common 
+                         configuration file.
+                             * Namenode
+                             * Secondary NameNode
+                             * BackupNode
+         
+4.         
+         
+         
+         
+         
+         

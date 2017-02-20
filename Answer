@@ -100,8 +100,29 @@
                              * Secondary NameNode
                              * BackupNode
          
-4.         
-         
+4.  The configuration files that are to be edited while installing a hadoop cluster are :
+                        i) Core-site.xml
+                       ii) HDFS-site.xml
+                      iii) YARN-site.xml
+                       iv) xml
+                       
+                  i) Settings that need to be done in Core-site.xml :-
+                            1.Configuring the name node address
+                            2.Configuring the rack awareness factor
+                            3.Selecting the type of security
+                 ii) Settings to be done in HDFS-site.xml :-
+                                            The properties inside this xml file deals with storage procedure inside HDFS of Hadoop.
+                            1. Configure port access
+                            2. Manages ssl client authentication
+                            3. Controls Network interface
+                            4. Changes file permission  
+                iii) Settings to be done in YARN-site.xml :-     
+                            1. WebAppProxy Configuration
+                            2. MapReduce Configuration
+                            3. NodeManager Configuration
+                            4. ResourceManager Configuration
+                            5. IPC Configuration
+                            
          
          
          
